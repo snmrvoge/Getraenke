@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "name": "Tee",
+    "price": 5.0,
+    "description": "Pfefferminz"
+  },
+  {
+    "id": 2,
+    "name": "Wasser",
+    "price": 6.0,
+    "description": "ohne Kohlensäure"
+  },
+  {
+    "id": 3,
+    "name": "Milch",
+    "price": 3.0,
+    "description": "ohne Geschmack"
+  },
+  {
+    "id": 4,
+    "name": "Siroup",
+    "price": 2.0,
+    "description": "Cola Geschmack"
+  }
+]

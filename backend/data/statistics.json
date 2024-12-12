@@ -1,0 +1,22 @@
+[
+  {
+    "drink_id": 1,
+    "total_quantity": 3,
+    "total_revenue": 15.0
+  },
+  {
+    "drink_id": 2,
+    "total_quantity": 3,
+    "total_revenue": 18.0
+  },
+  {
+    "drink_id": 3,
+    "total_quantity": 1,
+    "total_revenue": 3.0
+  },
+  {
+    "drink_id": 4,
+    "total_quantity": 2,
+    "total_revenue": 4.0
+  }
+]

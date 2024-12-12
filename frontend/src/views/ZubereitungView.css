@@ -1,0 +1,115 @@
+/* Spaltenbreiten */
+.col-bestellnr {
+  width: 10%;
+  min-width: 60px;
+}
+
+.col-kunde {
+  width: 20%;
+  min-width: 100px;
+}
+
+.col-getraenke {
+  width: 35%;
+  min-width: 150px;
+}
+
+.col-status {
+  width: 15%;
+  min-width: 80px;
+}
+
+.col-aktionen {
+  width: 20%;
+  min-width: 120px;
+}
+
+/* Mobile-first Ansatz */
+@media (max-width: 768px) {
+  .table-responsive {
+    font-size: 0.9rem;
+  }
+
+  .table td, .table th {
+    padding: 0.5rem;
+    min-width: auto !important;
+    width: auto !important;
+  }
+
+  /* Anpassungen für sehr kleine Bildschirme */
+  @media (max-width: 576px) {
+    .table {
+      display: block;
+      width: 100%;
+    }
+
+    .table thead {
+      display: none;
+    }
+
+    .table tbody,
+    .table tr,
+    .table td {
+      display: block;
+      width: 100%;
+    }
+
+    .table tr {
+      margin-bottom: 1rem;
+      border: 1px solid #dee2e6;
+    }
+
+    .table td {
+      text-align: right;
+      padding-left: 50%;
+      position: relative;
+      border-top: none;
+    }
+
+    .table td::before {
+      content: attr(data-label);
+      position: absolute;
+      left: 0;
+      width: 45%;
+      padding-left: 0.5rem;
+      font-weight: bold;
+      text-align: left;
+    }
+  }
+}
+
+/* Modal-Anpassungen für mobile Geräte */
+@media (max-width: 576px) {
+  .modal-dialog {
+    margin: 0.5rem;
+  }
+
+  .modal-body {
+    padding: 1rem;
+  }
+
+  .list-group-item {
+    padding: 0.5rem;
+  }
+}
+
+/* Allgemeine Verbesserungen */
+.table td, .table th {
+  vertical-align: middle;
+}
+
+.badge {
+  font-size: 0.9em;
+  padding: 0.5em 0.7em;
+}
+
+.btn {
+  white-space: nowrap;
+  margin: 0.2rem;
+}
+
+/* Verbesserte Lesbarkeit der Getränkeliste */
+.list-group-item small {
+  display: block;
+  margin-top: 0.2rem;
+}
