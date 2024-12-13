@@ -57,5 +57,195 @@
     "total_price": 13.0,
     "status": "fertig",
     "created_at": "2024-12-12T16:51:33.322939"
+  },
+  {
+    "id": 3,
+    "customer_name": "Noé",
+    "items": [
+      {
+        "drink_id": 5,
+        "quantity": 5
+      }
+    ],
+    "total_price": 20.0,
+    "status": "fertig",
+    "created_at": "2024-12-12T19:30:45.901443"
+  },
+  {
+    "id": 4,
+    "customer_name": "Fritz",
+    "items": [
+      {
+        "drink_id": 1,
+        "quantity": 1
+      }
+    ],
+    "total_price": 5.0,
+    "status": "fertig",
+    "created_at": "2024-12-12T20:19:19.611662"
+  },
+  {
+    "id": 5,
+    "customer_name": "Chef",
+    "items": [
+      {
+        "drink_id": 5,
+        "quantity": 1
+      }
+    ],
+    "total_price": 4.0,
+    "status": "fertig",
+    "created_at": "2024-12-12T20:34:25.312228"
+  },
+  {
+    "id": 6,
+    "customer_name": "1",
+    "items": [
+      {
+        "drink_id": 1,
+        "quantity": 1
+      },
+      {
+        "drink_id": 2,
+        "quantity": 1
+      },
+      {
+        "drink_id": 4,
+        "quantity": 1
+      }
+    ],
+    "total_price": 13.0,
+    "status": "fertig",
+    "created_at": "2024-12-12T20:38:49.659655"
+  },
+  {
+    "id": 7,
+    "customer_name": "2",
+    "items": [
+      {
+        "drink_id": 1,
+        "quantity": 1
+      },
+      {
+        "drink_id": 3,
+        "quantity": 1
+      },
+      {
+        "drink_id": 5,
+        "quantity": 1
+      }
+    ],
+    "total_price": 12.0,
+    "status": "fertig",
+    "created_at": "2024-12-12T20:38:59.577203"
+  },
+  {
+    "id": 8,
+    "customer_name": "3",
+    "items": [
+      {
+        "drink_id": 1,
+        "quantity": 1
+      },
+      {
+        "drink_id": 3,
+        "quantity": 1
+      },
+      {
+        "drink_id": 5,
+        "quantity": 1
+      }
+    ],
+    "total_price": 12.0,
+    "status": "fertig",
+    "created_at": "2024-12-12T20:39:09.964169"
+  },
+  {
+    "id": 9,
+    "customer_name": "4",
+    "items": [
+      {
+        "drink_id": 1,
+        "quantity": 1
+      },
+      {
+        "drink_id": 3,
+        "quantity": 1
+      },
+      {
+        "drink_id": 4,
+        "quantity": 2
+      },
+      {
+        "drink_id": 5,
+        "quantity": 1
+      }
+    ],
+    "total_price": 16.0,
+    "status": "fertig",
+    "created_at": "2024-12-12T20:39:34.054545"
+  },
+  {
+    "id": 10,
+    "customer_name": "4",
+    "items": [
+      {
+        "drink_id": 1,
+        "quantity": 1
+      },
+      {
+        "drink_id": 3,
+        "quantity": 1
+      },
+      {
+        "drink_id": 4,
+        "quantity": 2
+      },
+      {
+        "drink_id": 5,
+        "quantity": 1
+      }
+    ],
+    "total_price": 16.0,
+    "status": "fertig",
+    "created_at": "2024-12-12T20:39:34.297279"
+  },
+  {
+    "id": 11,
+    "customer_name": "4",
+    "items": [
+      {
+        "drink_id": 1,
+        "quantity": 1
+      },
+      {
+        "drink_id": 3,
+        "quantity": 1
+      },
+      {
+        "drink_id": 4,
+        "quantity": 2
+      },
+      {
+        "drink_id": 5,
+        "quantity": 1
+      }
+    ],
+    "total_price": 16.0,
+    "status": "fertig",
+    "created_at": "2024-12-12T20:39:35.376976"
+  },
+  {
+    "id": 12,
+    "customer_name": "5",
+    "items": [
+      {
+        "drink_id": 6,
+        "quantity": 16
+      }
+    ],
+    "total_price": 160.0,
+    "status": "offen",
+    "created_at": "2024-12-12T20:43:08.985766"
   }
 ]

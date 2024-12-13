@@ -1,22 +1,32 @@
 [
   {
     "drink_id": 1,
-    "total_quantity": 3,
-    "total_revenue": 15.0
+    "total_quantity": 10,
+    "total_revenue": 50.0
   },
   {
     "drink_id": 2,
-    "total_quantity": 3,
-    "total_revenue": 18.0
+    "total_quantity": 4,
+    "total_revenue": 24.0
   },
   {
     "drink_id": 3,
-    "total_quantity": 1,
-    "total_revenue": 3.0
+    "total_quantity": 6,
+    "total_revenue": 18.0
   },
   {
     "drink_id": 4,
-    "total_quantity": 2,
-    "total_revenue": 4.0
+    "total_quantity": 9,
+    "total_revenue": 18.0
+  },
+  {
+    "drink_id": 5,
+    "total_quantity": 11,
+    "total_revenue": 44.0
+  },
+  {
+    "drink_id": 6,
+    "total_quantity": 16,
+    "total_revenue": 160.0
   }
 ]

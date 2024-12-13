@@ -51,7 +51,14 @@ function AdminView() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${API_URL}/verify-admin`, { password });
+      console.log('Attempting login with password:', password);  
+      console.log('API URL:', `${API_URL}/verify-admin`);  
+      const response = await axios.post(`${API_URL}/verify-admin`, { password }, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      console.log('Login response:', response.data);  
       if (response.data.valid) {
         setIsAuthenticated(true);
         setShowError(false);
@@ -85,11 +92,12 @@ function AdminView() {
   const fetchStatistics = async () => {
     try {
       const response = await axios.get(`${API_URL}/statistics`);
-      setStatistics(response.data.drinks);
-      setTotalOrders(response.data.total_orders);
-      setOpenOrders(response.data.open_orders);
-      const totalRev = response.data.drinks.reduce((sum, stat) => sum + stat.total_revenue, 0);
-      const totalDrk = response.data.drinks.reduce((sum, stat) => sum + stat.total_quantity, 0);
+      const { drinks, total_orders, open_orders } = response.data;
+      setStatistics(drinks);
+      setTotalOrders(total_orders);
+      setOpenOrders(open_orders);
+      const totalRev = drinks.reduce((sum, stat) => sum + stat.total_revenue, 0);
+      const totalDrk = drinks.reduce((sum, stat) => sum + stat.total_quantity, 0);
       setTotalRevenue(totalRev);
       setTotalDrinks(totalDrk);
     } catch (error) {
@@ -198,33 +206,55 @@ function AdminView() {
       </Typography>
 
       <Grid container spacing={3}>
-        {/* Statistik-Übersicht */}
-        <Grid item xs={12}>
-          <Grid container spacing={3}>
-            <Grid item xs={12} sm={6}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Gesamtumsatz
-                  </Typography>
-                  <Typography variant="h4">
-                    {totalRevenue.toFixed(2)} M$
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Verkaufte Getränke
-                  </Typography>
-                  <Typography variant="h4">
-                    {totalDrinks}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
+        {/* Statistik-Karten */}
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" component="div">
+                  Gesamtumsatz
+                </Typography>
+                <Typography variant="h4">
+                  {totalRevenue.toFixed(2)} M$
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" component="div">
+                  Getränke verkauft
+                </Typography>
+                <Typography variant="h4">
+                  {totalDrinks}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" component="div">
+                  Bestellungen gesamt
+                </Typography>
+                <Typography variant="h4">
+                  {totalOrders}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" component="div">
+                  Offene Bestellungen
+                </Typography>
+                <Typography variant="h4">
+                  {openOrders}
+                </Typography>
+              </CardContent>
+            </Card>
           </Grid>
         </Grid>
 

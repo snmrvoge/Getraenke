@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
+from google.cloud import storage
 import json
 import os
 
@@ -12,20 +13,54 @@ app = FastAPI()
 # CORS-Middleware konfigurieren
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Erlaubt Zugriff von allen Ursprüngen
+    allow_origins=[
+        "https://getraenke-app-2023.ew.r.appspot.com",  # Production frontend
+        "https://default-dot-getraenke-app-2023.ew.r.appspot.com",  # Production frontend (default service)
+        "http://localhost:5173",                    # Local development
+        "http://localhost:8000",                    # Local development
+        "http://localhost:3001",                     # Local development React
+        "https://getraenke-app-2023.web.app"        # Frontend domain
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 
-# Datei-Pfade
-DATA_DIR = "data"
-DRINKS_FILE = os.path.join(DATA_DIR, "drinks.json")
-ORDERS_FILE = os.path.join(DATA_DIR, "orders.json")
-STATS_FILE = os.path.join(DATA_DIR, "statistics.json")
+# Google Cloud Storage Setup
+BUCKET_NAME = "getraenke-app-2023-data"
+storage_client = storage.Client()
+bucket = storage_client.bucket(BUCKET_NAME)
 
-# Erstelle data-Verzeichnis, falls es nicht existiert
-os.makedirs(DATA_DIR, exist_ok=True)
+# Hilfsfunktionen für Google Cloud Storage
+def save_to_gcs(blob_name: str, data: dict):
+    blob = bucket.blob(blob_name)
+    blob.upload_from_string(json.dumps(data))
+
+def load_from_gcs(blob_name: str, default_data=None):
+    blob = bucket.blob(blob_name)
+    try:
+        return json.loads(blob.download_as_string())
+    except Exception:
+        return default_data if default_data is not None else []
+
+# Standardgetränke
+DEFAULT_DRINKS = [
+    {"id": 2, "name": "Wasser", "price": 6.0, "description": "ohne Kohlensäure"},
+    {"id": 4, "name": "Siroup", "price": 2.0, "description": "Cola Geschmack"},
+    {"id": 5, "name": "Cola", "price": 4.0, "description": "4dl"},
+    {"id": 6, "name": "Schlumpf", "price": 10.0, "description": ""}
+]
+
+# Initialisiere JSON-Dateien, falls sie nicht existieren
+if not load_from_gcs("drinks.json"):
+    save_to_gcs("drinks.json", DEFAULT_DRINKS)
+
+if not load_from_gcs("orders.json"):
+    save_to_gcs("orders.json", [])
+
+if not load_from_gcs("statistics.json"):
+    save_to_gcs("statistics.json", [])
 
 # Modelle
 class Drink(BaseModel):
@@ -66,46 +101,32 @@ class Statistics(BaseModel):
     total_quantity: int = 0
     total_revenue: float = 0.0
 
+class StatisticsResponse(BaseModel):
+    drinks: List[DrinkStatistics]
+    total_orders: int
+    open_orders: int
+
 class LoginRequest(BaseModel):
     password: str
 
 # Hilfsfunktionen für Datenpersistenz
 def save_drinks():
-    with open(DRINKS_FILE, 'w', encoding='utf-8') as f:
-        json.dump([drink.dict() for drink in DRINKS], f, ensure_ascii=False, indent=2)
+    save_to_gcs("drinks.json", [drink.dict() for drink in DRINKS])
 
 def load_drinks():
-    if os.path.exists(DRINKS_FILE):
-        with open(DRINKS_FILE, 'r', encoding='utf-8') as f:
-            drinks_data = json.load(f)
-            return [Drink(**drink) for drink in drinks_data]
-    return [
-        Drink(id=1, name="Cappuccino", price=5.00, description="Italienischer Kaffee-Klassiker"),
-        Drink(id=2, name="Latte Macchiato", price=6.00, description="Espresso mit viel Milch"),
-        Drink(id=3, name="Espresso", price=3.00, description="Starker italienischer Espresso")
-    ]
+    return [Drink(**drink) for drink in load_from_gcs("drinks.json", DEFAULT_DRINKS)]
 
 def save_orders():
-    with open(ORDERS_FILE, 'w', encoding='utf-8') as f:
-        json.dump([order.dict() for order in ORDERS], f, ensure_ascii=False, indent=2)
+    save_to_gcs("orders.json", [order.dict() for order in ORDERS])
 
 def load_orders():
-    if os.path.exists(ORDERS_FILE):
-        with open(ORDERS_FILE, 'r', encoding='utf-8') as f:
-            orders_data = json.load(f)
-            return [Order(**order) for order in orders_data]
-    return []
+    return [Order(**order) for order in load_from_gcs("orders.json", [])]
 
 def save_statistics(stats):
-    with open(STATS_FILE, 'w', encoding='utf-8') as f:
-        json.dump([stat.dict() for stat in stats], f, ensure_ascii=False, indent=2)
+    save_to_gcs("statistics.json", [stat.dict() for stat in stats])
 
 def load_statistics():
-    if os.path.exists(STATS_FILE):
-        with open(STATS_FILE, 'r', encoding='utf-8') as f:
-            stats_data = json.load(f)
-            return [Statistics(**stat) for stat in stats_data]
-    return []
+    return [Statistics(**stat) for stat in load_from_gcs("statistics.json", [])]
 
 # Lade gespeicherte Daten beim Start
 DRINKS = load_drinks()
@@ -139,12 +160,23 @@ def update_statistics(order: Order):
     
     save_statistics(STATISTICS)
 
+# Login endpoint
+@app.post("/verify-admin")
+async def verify_admin(login: LoginRequest):
+    print(f"Received login request with password: {login.password}")  # Debug log
+    # Replace this with a secure password check in production
+    if login.password == "12122424":
+        print("Login successful")  # Debug log
+        return {"valid": True}
+    print("Login failed")  # Debug log
+    return {"valid": False}
+
 # Routen
 @app.get("/drinks", response_model=List[Drink])
 async def get_drinks():
     return DRINKS
 
-@app.post("/drinks", response_model=Drink)
+@app.post("/drinks")
 async def create_drink(drink: DrinkCreate):
     global drink_counter
     new_drink = Drink(
@@ -245,7 +277,7 @@ async def mark_order_as_prepared(order_id: int):
     save_orders()
     return {"message": "Bestellung als zubereitet markiert"}
 
-@app.get("/statistics")
+@app.get("/statistics", response_model=StatisticsResponse)
 async def get_statistics():
     stats = []
     total_orders = len(ORDERS)
@@ -260,18 +292,18 @@ async def get_statistics():
                     drink_orders += item.quantity
                     drink_revenue += item.quantity * drink.price
         
-        stats.append({
-            'drink_id': drink.id,
-            'name': drink.name,
-            'total_quantity': drink_orders,
-            'total_revenue': drink_revenue
-        })
+        stats.append(DrinkStatistics(
+            drink_id=drink.id,
+            name=drink.name,
+            total_quantity=drink_orders,
+            total_revenue=drink_revenue
+        ))
     
-    return {
-        'drinks': stats,
-        'total_orders': total_orders,
-        'open_orders': open_orders
-    }
+    return StatisticsResponse(
+        drinks=stats,
+        total_orders=total_orders,
+        open_orders=open_orders
+    )
 
 @app.post("/statistics/reset")
 async def reset_stats():
@@ -284,12 +316,6 @@ async def reset_stats():
     save_orders()
     save_statistics(STATISTICS)
     return {"message": "Statistiken und Bestellungen wurden zurückgesetzt"}
-
-@app.post("/verify-admin")
-async def verify_admin(login: LoginRequest):
-    if login.password == "12122424":
-        return {"valid": True}
-    return {"valid": False}
 
 if __name__ == "__main__":
     import uvicorn

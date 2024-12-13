@@ -1,1 +1,1 @@
-export const API_URL = 'http://10.177.111.44:8000';
+export const API_URL = 'https://backend-dot-getraenke-app-2023.ew.r.appspot.com';

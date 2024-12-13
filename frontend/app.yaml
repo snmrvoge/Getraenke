@@ -1,0 +1,29 @@
+runtime: nodejs18
+service: default
+env: standard
+instance_class: F1
+
+automatic_scaling:
+  target_cpu_utilization: 0.65
+  min_instances: 1
+  max_instances: 10
+
+handlers:
+  - url: /static
+    static_dir: build/static
+    secure: always
+    
+  - url: /(.*\.(json|ico|js|html|png))$
+    static_files: build/\1
+    upload: build/.*\.(json|ico|js|html|png)$
+    secure: always
+    
+  - url: /.*
+    static_files: build/index.html
+    upload: build/index.html
+    secure: always
+    http_headers:
+      X-Frame-Options: DENY
+      X-Content-Type-Options: nosniff
+      X-XSS-Protection: '1; mode=block'
+      Strict-Transport-Security: max-age=31536000; includeSubDomains
