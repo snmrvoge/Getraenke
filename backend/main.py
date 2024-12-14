@@ -19,7 +19,8 @@ app.add_middleware(
         "http://localhost:5173",                    # Local development
         "http://localhost:8000",                    # Local development
         "http://localhost:3001",                     # Local development React
-        "https://getraenke-app-2023.web.app"        # Frontend domain
+        "https://getraenke-app-2023.web.app",        # Frontend domain
+        "https://drinks.eworld.ch"                   # Custom domain
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -61,6 +62,9 @@ if not load_from_gcs("orders.json"):
 
 if not load_from_gcs("statistics.json"):
     save_to_gcs("statistics.json", [])
+
+if not load_from_gcs("settings.json"):
+    save_to_gcs("settings.json", {"show_order_count": True, "show_last_order": True, "show_order_list": True})
 
 # Modelle
 class Drink(BaseModel):
@@ -109,6 +113,11 @@ class StatisticsResponse(BaseModel):
 class LoginRequest(BaseModel):
     password: str
 
+class Settings(BaseModel):
+    show_order_count: bool = True
+    show_last_order: bool = True
+    show_order_list: bool = True
+
 # Hilfsfunktionen für Datenpersistenz
 def save_drinks():
     save_to_gcs("drinks.json", [drink.dict() for drink in DRINKS])
@@ -128,10 +137,17 @@ def save_statistics(stats):
 def load_statistics():
     return [Statistics(**stat) for stat in load_from_gcs("statistics.json", [])]
 
+def save_settings(settings: dict):
+    save_to_gcs("settings.json", settings)
+
+def load_settings() -> dict:
+    return load_from_gcs("settings.json", {"show_order_count": True, "show_last_order": True, "show_order_list": True})
+
 # Lade gespeicherte Daten beim Start
 DRINKS = load_drinks()
 ORDERS = load_orders()
 STATISTICS = load_statistics()
+SETTINGS = load_settings()
 
 # Initialisiere order_counter mit der höchsten vorhandenen ID + 1
 order_counter = max([order.id for order in ORDERS], default=-1) + 1
@@ -316,6 +332,15 @@ async def reset_stats():
     save_orders()
     save_statistics(STATISTICS)
     return {"message": "Statistiken und Bestellungen wurden zurückgesetzt"}
+
+@app.get("/settings")
+async def get_settings():
+    return load_settings()
+
+@app.post("/settings")
+async def update_settings(settings: Settings):
+    save_settings(settings.dict())
+    return settings
 
 if __name__ == "__main__":
     import uvicorn

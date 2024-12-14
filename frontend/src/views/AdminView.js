@@ -47,6 +47,12 @@ function AdminView() {
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [totalOrders, setTotalOrders] = useState(0);
   const [openOrders, setOpenOrders] = useState(0);
+  const [settings, setSettings] = useState({
+    show_order_count: true,
+    show_last_order: true,
+    show_order_list: true
+  });
+  const [error, setError] = useState(null);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -64,6 +70,7 @@ function AdminView() {
         setShowError(false);
         fetchDrinks();
         fetchStatistics();
+        fetchSettings();
       } else {
         setShowError(true);
       }
@@ -102,6 +109,15 @@ function AdminView() {
       setTotalDrinks(totalDrk);
     } catch (error) {
       console.error('Error fetching statistics:', error);
+    }
+  };
+
+  const fetchSettings = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/settings`);
+      setSettings(response.data);
+    } catch (error) {
+      console.error('Error fetching settings:', error);
     }
   };
 
@@ -161,6 +177,17 @@ function AdminView() {
       setResetDialogOpen(false);
     } catch (error) {
       console.error('Error resetting statistics:', error);
+    }
+  };
+
+  const handleSettingChange = async (setting) => {
+    const newSettings = { ...settings, [setting]: !settings[setting] };
+    try {
+      await axios.post(`${API_URL}/settings`, newSettings);
+      setSettings(newSettings);
+    } catch (error) {
+      console.error('Error updating settings:', error);
+      setError('Failed to update settings');
     }
   };
 
@@ -385,6 +412,61 @@ function AdminView() {
                 </ListItem>
               ))}
             </List>
+          </Paper>
+        </Grid>
+
+        {/* Kassenansicht Einstellungen */}
+        <Grid item xs={12}>
+          <Paper sx={{ p: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              Kassenansicht Einstellungen
+            </Typography>
+            <form>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={4}>
+                  <div className="form-check form-switch">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id="show-order-count"
+                      checked={settings.show_order_count}
+                      onChange={() => handleSettingChange('show_order_count')}
+                    />
+                    <label className="form-check-label" htmlFor="show-order-count">
+                      Anzahl offener Bestellungen anzeigen
+                    </label>
+                  </div>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <div className="form-check form-switch">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id="show-last-order"
+                      checked={settings.show_last_order}
+                      onChange={() => handleSettingChange('show_last_order')}
+                    />
+                    <label className="form-check-label" htmlFor="show-last-order">
+                      Letzte Bestellung anzeigen
+                    </label>
+                  </div>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <div className="form-check form-switch">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id="show-order-list"
+                      checked={settings.show_order_list}
+                      onChange={() => handleSettingChange('show_order_list')}
+                    />
+                    <label className="form-check-label" htmlFor="show-order-list">
+                      Liste der offenen Bestellungen anzeigen
+                    </label>
+                  </div>
+                </Grid>
+              </Grid>
+            </form>
           </Paper>
         </Grid>
       </Grid>

@@ -10,10 +10,16 @@ function KasseView() {
   const [order, setOrder] = useState({});
   const [openOrders, setOpenOrders] = useState([]);
   const [lastOrder, setLastOrder] = useState(null);
+  const [settings, setSettings] = useState({
+    show_order_count: true,
+    show_last_order: true,
+    show_order_list: true
+  });
 
   useEffect(() => {
     fetchDrinks();
     fetchOpenOrders();
+    fetchSettings();
     const interval = setInterval(fetchOpenOrders, 10000); // Alle 10 Sekunden aktualisieren
     return () => clearInterval(interval);
   }, []);
@@ -40,6 +46,15 @@ function KasseView() {
       }
     } catch (error) {
       console.error('Error fetching open orders:', error);
+    }
+  };
+
+  const fetchSettings = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/settings`);
+      setSettings(response.data);
+    } catch (error) {
+      console.error('Error fetching settings:', error);
     }
   };
 
@@ -101,13 +116,15 @@ function KasseView() {
       <div className="d-flex justify-content-between align-items-start mb-4">
         <div>
           <h2>Kasse</h2>
-          <div className="mt-2">
-            <Badge bg="warning" className="me-2" style={{ fontSize: '1.1em', padding: '8px 12px' }}>
-              {openOrders.length} offene Bestellung(en)
-            </Badge>
-          </div>
+          {settings.show_order_count && (
+            <div className="mt-2">
+              <Badge bg="warning" className="me-2" style={{ fontSize: '1.1em', padding: '8px 12px' }}>
+                {openOrders.length} offene Bestellung(en)
+              </Badge>
+            </div>
+          )}
         </div>
-        {lastOrder && (
+        {settings.show_last_order && lastOrder && (
           <div className="bg-info text-white p-3 rounded">
             <h5>Letzte Bestellung: {lastOrder.customer_name}</h5>
             <ul className="list-unstyled mb-0">
@@ -183,58 +200,60 @@ function KasseView() {
         </Button>
       </div>
 
-      <div className="open-orders-section mt-4">
-        <h3>Offene Bestellungen:</h3>
-        <div className="mb-4">
-          <h5>Getränke Übersicht:</h5>
+      {settings.show_order_list && (
+        <div className="open-orders-section mt-4">
+          <h3>Offene Bestellungen:</h3>
+          <div className="mb-4">
+            <h5>Getränke Übersicht:</h5>
+            <ul className="list-unstyled">
+              {drinks.map(drink => {
+                const totalQuantity = openOrders.reduce((sum, order) => {
+                  const orderItem = order.items.find(item => item.drink_id === drink.id);
+                  return sum + (orderItem ? orderItem.quantity : 0);
+                }, 0);
+                
+                if (totalQuantity > 0) {
+                  return (
+                    <li key={drink.id} className="mb-2">
+                      <strong>{drink.name}:</strong> {totalQuantity}x ({(totalQuantity * drink.price).toFixed(2)})
+                    </li>
+                  );
+                }
+                return null;
+              })}
+            </ul>
+          </div>
+          
+          <h5>Details:</h5>
           <ul className="list-unstyled">
-            {drinks.map(drink => {
-              const totalQuantity = openOrders.reduce((sum, order) => {
-                const orderItem = order.items.find(item => item.drink_id === drink.id);
-                return sum + (orderItem ? orderItem.quantity : 0);
+            {openOrders.map((order) => {
+              const total = order.items.reduce((sum, item) => {
+                const drink = drinks.find(d => d.id === item.drink_id);
+                return sum + (drink ? drink.price * item.quantity : 0);
               }, 0);
               
-              if (totalQuantity > 0) {
-                return (
-                  <li key={drink.id} className="mb-2">
-                    <strong>{drink.name}:</strong> {totalQuantity}x ({(totalQuantity * drink.price).toFixed(2)})
-                  </li>
-                );
-              }
-              return null;
+              return (
+                <li key={order.id} className="mb-3 p-3 border rounded">
+                  <h6>{order.customer_name}</h6>
+                  <ul className="list-unstyled mb-2">
+                    {order.items.map((item) => {
+                      const drink = drinks.find(d => d.id === item.drink_id);
+                      return (
+                        <li key={item.drink_id} className="ms-3">
+                          {item.quantity} x {drink ? drink.name : 'Unbekanntes Getränk'}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                  <div className="text-end">
+                    <strong>Total: {total.toFixed(2)}</strong>
+                  </div>
+                </li>
+              );
             })}
           </ul>
         </div>
-        
-        <h5>Details:</h5>
-        <ul className="list-unstyled">
-          {openOrders.map((order) => {
-            const total = order.items.reduce((sum, item) => {
-              const drink = drinks.find(d => d.id === item.drink_id);
-              return sum + (drink ? drink.price * item.quantity : 0);
-            }, 0);
-            
-            return (
-              <li key={order.id} className="mb-3 p-3 border rounded">
-                <h6>{order.customer_name}</h6>
-                <ul className="list-unstyled mb-2">
-                  {order.items.map((item) => {
-                    const drink = drinks.find(d => d.id === item.drink_id);
-                    return (
-                      <li key={item.drink_id} className="ms-3">
-                        {item.quantity} x {drink ? drink.name : 'Unbekanntes Getränk'}
-                      </li>
-                    );
-                  })}
-                </ul>
-                <div className="text-end">
-                  <strong>Total: {total.toFixed(2)}</strong>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+      )}
     </div>
   );
 }
